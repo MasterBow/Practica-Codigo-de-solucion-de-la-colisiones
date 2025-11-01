@@ -62,6 +62,11 @@ invulnerable = False
 tiempo_invulnerable = 0.4
 tiempo_ultimo_dano = 0
 
+# --- Knockback ---
+knock_vel_x = 0
+KNOCK_FORCE = 200  # píxeles/segundo de empuje lateral
+KNOCK_DECAY = 6    # disipación gradual
+
 # --- Funciones auxiliares ---
 def dibujar_neon(rect, color, ancho=2):
     for i in range(5, 0, -1):
@@ -145,6 +150,13 @@ while True:
         if ahora - ultimo_estatico_tiempo > 0.5:
             vida -= 0.5
 
+    # Aplicar knockback residual
+    if knock_vel_x != 0:
+        jugador.x += knock_vel_x * dt
+        knock_vel_x -= KNOCK_DECAY * knock_vel_x * dt
+        if abs(knock_vel_x) < 5:
+            knock_vel_x = 0
+
     # Física
     vel_y += GRAVEDAD * dt
     if vel_y > 1000:
@@ -157,14 +169,12 @@ while True:
     # Colisión con enemigos
     for e in enemigos:
         if jugador.colliderect(e):
-            # Pequeño rebote físico (knockback)
             if jugador.centerx < e.centerx:
-                jugador.right = e.left
+                knock_vel_x = -KNOCK_FORCE
             else:
-                jugador.left = e.right
-            vel_y = FUERZA_SALTO / 3  # impulso hacia arriba
+                knock_vel_x = KNOCK_FORCE
+            vel_y = FUERZA_SALTO / 3
 
-            # Daño + invulnerabilidad temporal
             if not invulnerable:
                 vida -= 33
                 invulnerable = True
@@ -173,6 +183,16 @@ while True:
     # Fin de invulnerabilidad
     if invulnerable and (ahora - tiempo_ultimo_dano) > tiempo_invulnerable:
         invulnerable = False
+
+    # Mantener dentro del mapa
+    if jugador.left < 0:
+        jugador.left = 0
+    if jugador.right > ANCHO:
+        jugador.right = ANCHO
+    if jugador.bottom > ALTO:
+        jugador.bottom = ALTO
+        vel_y = 0
+        en_suelo = True
 
     # Game over
     if vida <= 0:
@@ -189,7 +209,6 @@ while True:
     for p in plataformas:
         dibujar_neon(p, NEON_BLUE)
 
-    # Parpadeo durante invulnerabilidad
     if not invulnerable or int(ahora * 20) % 2 == 0:
         dibujar_neon(jugador, NEON_GREEN)
 
