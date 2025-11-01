@@ -57,6 +57,11 @@ ultimo_mov_tiempo = time.time()
 ultimo_estatico_tiempo = time.time()
 movimiento_activo = False
 
+# --- Invulnerabilidad ---
+invulnerable = False
+tiempo_invulnerable = 0.4
+tiempo_ultimo_dano = 0
+
 # --- Funciones auxiliares ---
 def dibujar_neon(rect, color, ancho=2):
     for i in range(5, 0, -1):
@@ -146,13 +151,28 @@ while True:
         vel_y = 1000
     vel_y, en_suelo = mover_jugador(jugador, vel_x, vel_y, plataformas, dt)
 
-    # Enemigos
+    # Movimiento enemigos
     mover_enemigos(enemigos, dir_enemigo, plataformas, ANCHO, dt)
 
+    # Colisión con enemigos
     for e in enemigos:
         if jugador.colliderect(e):
-            pygame.quit()
-            sys.exit()
+            # Pequeño rebote físico (knockback)
+            if jugador.centerx < e.centerx:
+                jugador.right = e.left
+            else:
+                jugador.left = e.right
+            vel_y = FUERZA_SALTO / 3  # impulso hacia arriba
+
+            # Daño + invulnerabilidad temporal
+            if not invulnerable:
+                vida -= 33
+                invulnerable = True
+                tiempo_ultimo_dano = ahora
+
+    # Fin de invulnerabilidad
+    if invulnerable and (ahora - tiempo_ultimo_dano) > tiempo_invulnerable:
+        invulnerable = False
 
     # Game over
     if vida <= 0:
@@ -168,7 +188,11 @@ while True:
     pantalla.fill(FONDO)
     for p in plataformas:
         dibujar_neon(p, NEON_BLUE)
-    dibujar_neon(jugador, NEON_GREEN)
+
+    # Parpadeo durante invulnerabilidad
+    if not invulnerable or int(ahora * 20) % 2 == 0:
+        dibujar_neon(jugador, NEON_GREEN)
+
     for e in enemigos:
         dibujar_neon(e, NEON_RED)
 
