@@ -125,7 +125,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Movimiento del jugador
+    # Movimiento del jugador Pratica 1
     teclas = pygame.key.get_pressed()
     vel_x = 0
     if teclas[pygame.K_LEFT]:
@@ -157,7 +157,7 @@ while True:
         if abs(knock_vel_x) < 5:
             knock_vel_x = 0
 
-    # Física
+    # Física Practica 2
     vel_y += GRAVEDAD * dt
     if vel_y > 1000:
         vel_y = 1000
@@ -166,7 +166,7 @@ while True:
     # Movimiento enemigos
     mover_enemigos(enemigos, dir_enemigo, plataformas, ANCHO, dt)
 
-    # Colisión con enemigos
+    # Colisión con enemigos Practica 4
     for e in enemigos:
         if jugador.colliderect(e):
             if jugador.centerx < e.centerx:
@@ -184,7 +184,7 @@ while True:
     if invulnerable and (ahora - tiempo_ultimo_dano) > tiempo_invulnerable:
         invulnerable = False
 
-    # Mantener dentro del mapa
+    # Mantener dentro del mapa Practica 4
     if jugador.left < 0:
         jugador.left = 0
     if jugador.right > ANCHO:
