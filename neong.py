@@ -1,7 +1,7 @@
 import pygame
 import sys
 import time
-
+#Practica 0, 1 , 2, 4 terminadas
 # --- Inicialización ---
 pygame.init()
 ANCHO, ALTO = 900, 500
